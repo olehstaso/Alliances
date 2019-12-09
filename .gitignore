@@ -1,0 +1,7 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/Alliances/.vs/Alliances
+/Alliances/Alliances/bin/Debug/netcoreapp2.2
+/Alliances/Alliances/obj
