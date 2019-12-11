@@ -1,5 +1,9 @@
 USE [AlliancesDb]
 
+DROP VIEW IF EXISTS [dbo].[CountriesExtended]
+GO
+DROP VIEW IF EXISTS [dbo].[CountriesInAlliance]
+GO
 DROP TABLE IF EXISTS [dbo].[CountryAlliances]
 GO
 DROP TABLE IF EXISTS [dbo].[Alliances]
@@ -69,14 +73,54 @@ END
 
 GO
 
---TRUNCATE TABLE [dbo].[CountryAlliances];
---TRUNCATE TABLE [dbo].[Alliances];
---TRUNCATE TABLE [dbo].[Countries];
---TRUNCATE TABLE [dbo].[Continents];
+IF NOT EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'[dbo].[CountriesExtended]'))
+BEGIN
+EXEC dbo.sp_executesql @statement = N'CREATE VIEW [dbo].[CountriesExtended]
+AS
+SELECT        dbo.Countries.Id, dbo.Countries.Name, dbo.Continents.Name AS Continent
+FROM            dbo.Countries INNER JOIN
+                         dbo.Continents ON dbo.Countries.ContinentId = dbo.Continents.Id
+' 
+END
+GO
 
---GO
+IF NOT EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'[dbo].[CountriesInAlliance]'))
+BEGIN
+EXEC dbo.sp_executesql @statement = N'CREATE VIEW [dbo].[CountriesInAlliance]
+AS
+SELECT        dbo.Alliances.Name AS Alliance, dbo.Countries.Name AS Country
+FROM            dbo.CountryAlliances INNER JOIN
+                         dbo.Alliances ON dbo.CountryAlliances.AllianceId = dbo.Alliances.Id INNER JOIN
+                         dbo.Countries ON dbo.CountryAlliances.CountryId = dbo.Countries.Id
+' 
+END
+GO
 
-DECLARE @euId uniqueidentifier = NEWID();
+DECLARE @erId uniqueidentifier = NEWID();
 DECLARE @naId uniqueidentifier = NEWID();
 INSERT INTO [dbo].[Continents] ([Id],[Name])
-VALUES (@euId, N'Europe'), (@naId, N'North America')
+VALUES (@erId, N'Europe'), 
+	   (@naId, N'North America')
+
+DECLARE @frId uniqueidentifier = NEWID();
+DECLARE @geId uniqueidentifier = NEWID();
+DECLARE @usId uniqueidentifier = NEWID();
+
+INSERT INTO [dbo].[Countries] ([Id], [Name], [ContinentId])
+VALUES (@frId, N'France', @erId),
+	   (@geId, N'Germany', @erId),
+	   (@usId, N'USA', @naId)
+
+DECLARE @euId uniqueidentifier = NEWID();
+DECLARE @natoId uniqueidentifier = NEWID();
+
+INSERT INTO [dbo].[Alliances] ([Id], [Name], [Type])
+VALUES (@euId, N'Europian Union', N'Economical'),
+	   (@natoId, N'NATO', N'Military')
+
+INSERT INTO [dbo].[CountryAlliances] (AllianceId, CountryId)
+VALUES (@euId, @frId),
+	   (@euId, @geId),
+	   (@natoId, @frId),
+	   (@natoId, @geId),
+	   (@natoId, @usId)
