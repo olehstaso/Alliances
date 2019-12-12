@@ -5,3 +5,5 @@
 /Alliances/.vs/Alliances
 /Alliances/Alliances/bin/Debug/netcoreapp2.2
 /Alliances/Alliances/obj
+/Alliances/.vs/config/applicationhost.config
+/Alliances/Alliances/Alliances.csproj.user
